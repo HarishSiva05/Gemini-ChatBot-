@@ -1,25 +1,77 @@
-import logo from './logo.svg';
-import './App.css';
+import {useState} from 'react'
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
+const App = () => {
+  const [value, setValue] =useState("")
+  const [error, setError] = useState("")
+  const [chatHistory, setchatHistory] = useState([])
+  const surpriseOptions = [
+    'Who is Aristotle ?',
+    'Where is sandwich made?',
+    'Who found Pizza?'
+  
+  ]
+  const surprise = () => {
+    const randomValue = surpriseOptions[Math.floor(Math.random()*surpriseOptions.length)]
+    setValue(randomValue)
+  }
+
+  const getResponse = async() => {
+    if(!value) {
+      setError("Enter your Question")
+      return
+    }
+    try {
+
+      const options ={
+        method: 'POST',
+        body: JSON.stringify({
+          history: chatHistory,
+          message: value
+        }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      }
+      const response = await fetch('http://localhost:8000/gemini', options)
+      const data = await response.text()
+      console.log(data)
+
+    } catch (error) {
+      console.error(error)
+      setError("Please try Again ")
+    }
+  } 
+
+  return(
+
+      <div className="app">
+        <p>What do you have in your mind ? 
+        <button className="surprise" onClick={surprise} disabled={!chatHistory}>Hit me !</button>
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
 
-export default App;
+        <div className="input-container">
+        <input
+          value={value}
+          placeholder="When is NewYear ?"
+          onChange={ (e)=> setValue(e.target.value)}
+        />
+
+        {!error && <button onClick={getResponse}> Ask me</button>}
+        {error && <button>Clear</button>}
+
+        </div>
+        {error && <p>{error}</p>}
+        <div className='search-result'>
+        <div key={""}>
+          <p className='answer'></p>
+        </div>
+
+        </div>
+       
+      </div>
+    
+
+  )
+
+}
+export default App
