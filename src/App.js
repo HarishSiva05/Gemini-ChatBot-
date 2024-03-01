@@ -35,12 +35,26 @@ const App = () => {
       const response = await fetch('http://localhost:8000/gemini', options)
       const data = await response.text()
       console.log(data)
+      setchatHistory(oldChatHistory => [...oldChatHistory, {
+        role: "user",
+        parts: value
+      },
+    {
+      role:"AI",
+      parts: data
+    }])
+    setValue("")
 
     } catch (error) {
       console.error(error)
       setError("Please try Again ")
     }
   } 
+  const clear = () => {
+    setValue("")
+    setError("")
+    setchatHistory([])
+  }
 
   return(
 
@@ -57,18 +71,18 @@ const App = () => {
         />
 
         {!error && <button onClick={getResponse}> Ask me</button>}
-        {error && <button>Clear</button>}
+        {error && <button onClick={clear}>Clear</button>}
 
         </div>
         {error && <p>{error}</p>}
         <div className='search-result'>
-        <div key={""}>
-          <p className='answer'></p>
+        {chatHistory.map((chatItem, _index) => <div key={_index}>
+          <p className='answer'>{chatItem.role}:{chatItem.parts}</p>
+          </div>)}
         </div>
 
         </div>
-       
-      </div>
+  
     
 
   )
